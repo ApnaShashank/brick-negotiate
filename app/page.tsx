@@ -72,10 +72,10 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-surface">
       <Navbar />
 
-      <main className="pt-20">
+      <main>
         {/* Hero Section */}
-        <section className="min-h-[870px] flex flex-col md:flex-row items-center justify-between px-8 md:px-20 py-20 gap-12 bg-surface">
-          <div className="md:w-1/2 space-y-8">
+        <section className="flex flex-col md:flex-row items-start justify-between px-8 md:px-20 pt-8 md:pt-12 pb-24 gap-12 bg-surface min-h-[calc(100vh-80px)]">
+          <div className="md:w-1/2 space-y-8 md:mt-10">
             <div className="inline-block bg-secondary-container border-2 border-on-background px-4 py-1 rounded-full font-label text-sm font-bold uppercase tracking-widest text-on-secondary-container">
               New Season: The Urban Build
             </div>

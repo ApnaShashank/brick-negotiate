@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-[#FCF9F8] border-b-4 border-[#111111] shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] relative">
+      <nav className="sticky top-0 w-full z-50 flex justify-between items-center px-4 md:px-8 h-20 bg-[#FCF9F8] border-b-4 border-[#111111] shadow-[4px_4px_0px_0px_rgba(17,17,17,1)]">
         <div className="flex items-center gap-2">
           <Link href="/" className="text-xl md:text-2xl font-black text-[#111111] uppercase tracking-tighter">
             BRICK_NEGOTIATE

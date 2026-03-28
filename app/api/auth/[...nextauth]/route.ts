@@ -1,12 +1,17 @@
 import NextAuth from "next-auth";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import dbConnect from "@/lib/db";
 import { User } from "@/models/schemas";
 import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -21,8 +26,9 @@ export const authOptions: NextAuthOptions = {
         await dbConnect();
         const user = await User.findOne({ email: credentials.email });
 
-        if (!user) {
-          throw new Error("Invalid email or password");
+        if (!user || (!user.password && user.email)) {
+           // If user has no password, they created account with Google
+           throw new Error("Invalid password or account uses Google Login");
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
@@ -35,6 +41,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           email: user.email,
           name: user.name,
+          image: user.image,
         };
       }
     })
@@ -43,6 +50,24 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt"
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "google") {
+        await dbConnect();
+        const existingUser = await User.findOne({ email: user.email });
+        if (!existingUser) {
+          const newUser = await User.create({
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            studs: 500, // Sign-on bonus
+          });
+          user.id = newUser._id.toString();
+        } else {
+          user.id = existingUser._id.toString();
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

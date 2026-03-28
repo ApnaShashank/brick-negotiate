@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const UserSchema = new mongoose.Schema({
   name: { type: String },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String }, // Optional for Google Auth users
   image: { type: String },
   bestPrice: { type: Number, default: 999999 },
   bestRounds: { type: Number, default: 0 },

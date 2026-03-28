@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     await dbConnect();
 
     const feedback = await Feedback.create({
-      userId: session?.user?.id || null,
+      userId: (session?.user as any)?.id || null,
       name: session?.user?.name || "Anonymous Player",
       email: session?.user?.email || null,
       message,

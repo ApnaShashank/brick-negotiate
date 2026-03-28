@@ -162,6 +162,15 @@ export default function AuthPage() {
               </div>
             </div>
 
+            <button
+              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              type="button"
+              className="w-full mb-6 py-4 bg-white text-[#111111] border-4 border-on-background rounded-lg font-headline font-black text-lg uppercase tracking-tight flex items-center justify-center gap-3 brick-shadow-sm hover:translate-y-[-2px] hover:shadow-[4px_4px_0px_0px_rgba(17,17,17,1)] active:scale-95 transition-all"
+            >
+              <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-6 h-6" />
+              Continue with Google
+            </button>
+
             <button 
               onClick={() => setIsLogin(!isLogin)}
               className="w-full py-3 bg-primary-container text-on-primary-container border-2 border-on-background rounded-lg font-bold text-sm uppercase flex items-center justify-center gap-3 hover:scale-105 active:scale-95 transition-all"

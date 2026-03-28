@@ -24,7 +24,7 @@ export const PRODUCTS: Product[] = [
     description: 'A massive, intricate luxury car garage featuring neon lights and miniature sports cars.',
     marketValue: 249.99,
     hardMinimum: 185.00,
-    image: '/midnight_motor.png',
+    image: 'https://ik.imagekit.io/DEMOPROJECT/midnight_motor.png',
     difficulty: 'Easy'
   },
   {
@@ -33,7 +33,7 @@ export const PRODUCTS: Product[] = [
     description: 'A highly detailed traditional Japanese garden with a miniature cherry blossom tree and pagoda.',
     marketValue: 129.99,
     hardMinimum: 95.00,
-    image: '/botanical_zen.png',
+    image: 'https://ik.imagekit.io/DEMOPROJECT/botanical_zen.png',
     difficulty: 'Medium'
   },
   {
@@ -42,10 +42,11 @@ export const PRODUCTS: Product[] = [
     description: 'A huge, complex sci-fi industrial rig with exposed gears, glass canopies, and thrusters.',
     marketValue: 799.99,
     hardMinimum: 620.00,
-    image: '/deep_space_rig.png',
+    image: 'https://ik.imagekit.io/DEMOPROJECT/deep_space_rig.png',
     difficulty: 'Hard'
   }
 ];
+
 
 
 export const PERSONALITIES: Personality[] = [

@@ -20,6 +20,7 @@ export default function AdminPage() {
   const router = useRouter();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchAdminStats = async () => {
@@ -39,6 +40,16 @@ export default function AdminPage() {
       if (!data.error) setUsers(data);
     } catch (err) {
       console.error("Failed to fetch user registry");
+    }
+  };
+
+  const fetchFeedback = async () => {
+    try {
+      const res = await fetch('/api/feedback');
+      const data = await res.json();
+      if (!data.error) setFeedbacks(data);
+    } catch (err) {
+      console.error("Failed to fetch feedback");
     }
   };
 
@@ -197,6 +208,50 @@ export default function AdminPage() {
               {users.length === 0 && (
                 <div className="p-12 text-center text-on-surface-variant font-bold uppercase tracking-widest opacity-20">
                   No players captured in registry
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Feedback Feed */}
+          <section className="mb-12">
+            <h2 className="font-headline text-3xl font-black uppercase mb-8 flex items-center gap-3">
+              <span className="material-symbols-outlined text-4xl">notification_important</span> LATEST TRANSMISSIONS
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {feedbacks.map((f) => (
+                <div key={f._id} className="bg-white border-4 border-on-background p-6 rounded-2xl brick-shadow-sm flex flex-col hover:-rotate-1 transition-transform">
+                  <div className="flex justify-between items-start mb-4">
+                    <span className={`px-2 py-1 border-2 border-[#111111] text-[10px] font-black uppercase tracking-widest ${
+                      f.type === 'bug' ? 'bg-error text-white' : 
+                      f.type === 'praise' ? 'bg-primary' : 
+                      f.type === 'suggestion' ? 'bg-secondary' : 'bg-surface-variant'
+                    }`}>
+                      {f.type}
+                    </span>
+                    <div className="flex text-yellow-500">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <span key={s} className="material-symbols-outlined text-sm">
+                          {s <= f.rating ? 'star' : 'star_outline'}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="font-body font-bold text-sm mb-6 flex-1 italic">"{f.message}"</p>
+                  <div className="pt-4 border-t-2 border-on-background/10 flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-surface-variant border-2 border-on-background flex items-center justify-center font-black text-xs uppercase">
+                      {f.name[0]}
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-black uppercase">{f.name}</div>
+                      <div className="text-[8px] opacity-40">{new Date(f.createdAt).toLocaleString()}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {feedbacks.length === 0 && (
+                <div className="col-span-full py-12 text-center border-4 border-dashed border-on-background/20 rounded-2xl font-headline font-black uppercase opacity-20 transition-all">
+                  No transmissions received
                 </div>
               )}
             </div>

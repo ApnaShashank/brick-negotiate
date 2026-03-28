@@ -15,24 +15,50 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'BRICK_NEGOTIATE - Master the Art of Negotiation',
-  description: 'Build your deal block by block. Compete against advanced AI sellers in the ultimate high-stakes modular marketplace.',
+  metadataBase: new URL('https://brick-negotiate.vercel.app'),
+  title: 'Brick Negotiate | Master AI Negotiation & Build Your Collection',
+  description: 'Step into the highest-stakes modular marketplace. Negotiate with advanced AI sellers, earn Studs, and build the ultimate brick collection block by block.',
+  keywords: ['LEGO negotiation', 'AI game', 'brick marketplace', 'negotiation simulator', 'modular bricks'],
   icons: {
     icon: 'https://ik.imagekit.io/DEMOPROJECT/1c75b464-a4d6-4a1f-9053-3cfa2951626e.png',
+    apple: 'https://ik.imagekit.io/DEMOPROJECT/1c75b464-a4d6-4a1f-9053-3cfa2951626e.png',
+  },
+  alternates: {
+    canonical: '/',
   },
   openGraph: {
-    title: 'BRICK_NEGOTIATE',
-    description: 'Master the Art of Negotiation',
-    images: ['https://ik.imagekit.io/DEMOPROJECT/1c75b464-a4d6-4a1f-9053-3cfa2951626e.png'],
+    title: 'Brick Negotiate | Master AI Negotiation',
+    description: 'Negotiate with advanced AI sellers and build your modular collection.',
+    url: 'https://brick-negotiate.vercel.app',
+    siteName: 'Brick Negotiate',
+    images: [
+      {
+        url: 'https://ik.imagekit.io/DEMOPROJECT/1c75b464-a4d6-4a1f-9053-3cfa2951626e.png',
+        width: 1200,
+        height: 630,
+        alt: 'Brick Negotiate Logo',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
+    title: 'Brick Negotiate | Master AI Negotiation',
+    description: 'Negotiate with advanced AI sellers and build your modular collection block by block.',
     images: ['https://ik.imagekit.io/DEMOPROJECT/1c75b464-a4d6-4a1f-9053-3cfa2951626e.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
   }
 };
 
 import AuthProvider from '@/components/AuthProvider';
 import PageWrapper from '@/components/PageWrapper';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import FeedbackSticker from '@/components/FeedbackSticker';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function RootLayout({
   children,
@@ -55,7 +81,10 @@ export default function RootLayout({
           <PageWrapper>
             {children}
           </PageWrapper>
+          <FeedbackSticker />
         </AuthProvider>
+        <GoogleAnalytics />
+        <Analytics />
       </body>
     </html>
   );

@@ -19,33 +19,34 @@ export interface Personality {
 
 export const PRODUCTS: Product[] = [
   {
-    id: 'modular-tower',
-    name: 'Skyline Modular Tower',
-    description: 'A 2,500-piece masterpiece of precision engineering with internal lighting.',
+    id: 'midnight-motor-club',
+    name: 'Midnight Motor-Club',
+    description: 'A massive, intricate luxury car garage featuring neon lights and miniature sports cars.',
     marketValue: 249.99,
     hardMinimum: 185.00,
-    image: 'https://images.unsplash.com/photo-1585336261022-680e295ce3fe?q=80&w=2070&auto=format&fit=crop',
+    image: '/midnight_motor.png',
     difficulty: 'Easy'
   },
   {
-    id: 'cyber-cafe',
-    name: 'Neo-Tokyo Cyber Cafe',
-    description: 'Neon-infused architectural set with transparent "hologram" pieces and custom decals.',
+    id: 'botanical-zen-garden',
+    name: 'Botanical Zen Garden',
+    description: 'A highly detailed traditional Japanese garden with a miniature cherry blossom tree and pagoda.',
     marketValue: 129.99,
     hardMinimum: 95.00,
-    image: 'https://images.unsplash.com/photo-1593115057322-e94b77572f20?q=80&w=2071&auto=format&fit=crop',
+    image: '/botanical_zen.png',
     difficulty: 'Medium'
   },
   {
-    id: 'interstellar-voyager',
-    name: 'UCS Interstellar Voyager',
-    description: 'Ultimate Collector Series starship with 5,000+ pieces and a display stand.',
+    id: 'deep-space-rig',
+    name: 'Deep Space Mining Rig',
+    description: 'A huge, complex sci-fi industrial rig with exposed gears, glass canopies, and thrusters.',
     marketValue: 799.99,
     hardMinimum: 620.00,
-    image: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072&auto=format&fit=crop',
+    image: '/deep_space_rig.png',
     difficulty: 'Hard'
   }
 ];
+
 
 export const PERSONALITIES: Personality[] = [
   {

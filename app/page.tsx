@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { PRODUCTS, PERSONALITIES } from '@/lib/game-data';
 
@@ -97,19 +98,72 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Brick Grid Illustration */}
+          {/* Interactive Brick Grid Illustration */}
           <div className="md:w-1/2 w-full aspect-square relative grid grid-cols-4 grid-rows-4 gap-4 p-4 bg-surface-container border-4 border-on-background rounded-xl brick-shadow-lg stud-pattern">
-            <div className="col-span-2 row-span-2 bg-primary-container border-4 border-on-background rounded-xl flex items-center justify-center brick-shadow">
-              <span className="material-symbols-outlined text-s-6xl" style={{ fontVariationSettings: "'FILL' 1" }}>token</span>
-            </div>
-            <div className="col-span-2 bg-secondary-container border-4 border-on-background rounded-xl brick-shadow"></div>
-            <div className="row-span-2 bg-tertiary-container border-4 border-on-background rounded-xl brick-shadow"></div>
-            <div className="bg-surface-container-highest border-4 border-on-background rounded-xl brick-shadow"></div>
-            <div className="col-span-2 bg-on-background rounded-xl flex items-center justify-center">
-              <span className="text-surface font-black text-4xl">100%</span>
-            </div>
-            <div className="bg-primary-container border-4 border-on-background rounded-xl brick-shadow"></div>
+            {/* Box 1 (Large Square) */}
+            <motion.div 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.95, rotate: -5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+              className="col-span-2 row-span-2 bg-primary-container border-4 border-on-background rounded-xl flex items-center justify-center brick-shadow cursor-pointer select-none"
+            >
+              <span className="material-symbols-outlined text-8xl text-on-primary-container drop-shadow-md" style={{ fontVariationSettings: "'FILL' 1" }}>precision_manufacturing</span>
+            </motion.div>
+            
+            {/* Box 2 (Horizontal Rectangle) */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              className="col-span-2 bg-secondary-container border-4 border-on-background rounded-xl brick-shadow cursor-pointer flex items-center justify-center select-none"
+            >
+              <span className="material-symbols-outlined text-6xl text-on-secondary-container drop-shadow-md">handshake</span>
+            </motion.div>
+            
+            {/* Box 3 (Vertical Rectangle) */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9, rotate: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              className="row-span-2 bg-tertiary-container border-4 border-on-background rounded-xl brick-shadow cursor-pointer flex items-center justify-center select-none"
+            >
+              <span className="material-symbols-outlined text-6xl text-on-tertiary-container drop-shadow-md">psychology</span>
+            </motion.div>
+            
+            {/* Box 4 (Small Square Top Right) */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.8, borderRadius: "50%", rotate: 90 }}
+              transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              className="bg-surface-container-highest border-4 border-on-background rounded-xl brick-shadow flex items-center justify-center cursor-pointer select-none overflow-hidden group"
+            >
+              <span className="material-symbols-outlined text-5xl drop-shadow-sm group-hover:scale-125 transition-transform text-on-background">bolt</span>
+            </motion.div>
+            
+            {/* Box 5 (Horizontal Rectangle Bottom) */}
+            <motion.div 
+              whileHover={{ scale: 1.02, rotateX: 180 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+              className="col-span-2 bg-on-background rounded-xl flex items-center justify-center cursor-pointer brick-shadow border-4 border-[#111111] select-none text-surface"
+            >
+              <div className="flex flex-col items-center">
+                <span className="font-black text-4xl leading-none">100%</span>
+                <span className="font-bold text-[10px] uppercase tracking-widest opacity-60 mt-1">Modular</span>
+              </div>
+            </motion.div>
+            
+            {/* Box 6 (Small Square Bottom Right) */}
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9, rotate: -15 }}
+              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              className="bg-primary-container border-4 border-on-background rounded-xl brick-shadow flex items-center justify-center cursor-pointer select-none"
+            >
+              <span className="material-symbols-outlined text-5xl text-on-primary-container drop-shadow-sm">diamond</span>
+            </motion.div>
           </div>
+
         </section>
 
         {/* Features Bento Grid */}

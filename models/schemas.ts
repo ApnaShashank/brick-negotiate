@@ -36,3 +36,14 @@ const NegotiationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 export const Negotiation = mongoose.models.Negotiation || mongoose.model('Negotiation', NegotiationSchema);
+
+const FeedbackSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  name: { type: String, default: "Anonymous Player" },
+  email: { type: String },
+  message: { type: String, required: true },
+  rating: { type: Number, min: 1, max: 5 },
+  type: { type: String, enum: ['bug', 'suggestion', 'praise', 'other'], default: 'other' }
+}, { timestamps: true });
+
+export const Feedback = mongoose.models.Feedback || mongoose.model('Feedback', FeedbackSchema);

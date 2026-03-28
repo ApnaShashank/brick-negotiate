@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brick Negotiate Color Palette */
+  --background: #fcf9f8;
+  --on-background: #1c1b1b;
+  --surface: #fcf9f8;
+  --on-surface: #1c1b1b;
+  --on-surface-variant: #4e4634;
+  --surface-container: #f0edec;
+  --surface-container-low: #f6f3f2;
+  --surface-container-lowest: #ffffff;
+  --surface-container-high: #ebe7e7;
+  --surface-container-highest: #e5e2e1;
+  --primary: #765b00;
+  --on-primary: #ffffff;
+  --primary-container: #f4c542;
+  --on-primary-container: #6b5200;
+  --secondary: #056493;
+  --on-secondary: #ffffff;
+  --secondary-container: #87cbff;
+  --on-secondary-container: #00567f;
+  --tertiary: #bb152c;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #ffb9b7;
+  --on-tertiary-container: #ad0324;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --outline: #807662;
+  --outline-variant: #d1c5ae;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-on-background: var(--on-background);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --font-headline: var(--font-headline);
+  --font-body: var(--font-body);
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--on-background);
+  font-family: var(--font-body), 'Manrope', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline), 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Custom Utilities */
+.brick-shadow {
+  box-shadow: 4px 4px 0px 0px rgba(17, 17, 17, 1);
+}
+
+.brick-shadow-sm {
+  box-shadow: 2px 2px 0px 0px rgba(17, 17, 17, 1);
+}
+
+.brick-shadow-lg {
+  box-shadow: 8px 8px 0px 0px rgba(17, 17, 17, 1);
+}
+
+.stud-pattern {
+  background-image: radial-gradient(rgba(17, 17, 17, 1) 10%, transparent 10%);
+  background-size: 24px 24px;
+}
+
+/* Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }

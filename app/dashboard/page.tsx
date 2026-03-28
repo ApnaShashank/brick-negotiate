@@ -52,7 +52,40 @@ export default function DashboardPage() {
     }
   }, [session, status, router]);
 
-  if (status === 'loading' || loading) return <div className="min-h-screen flex items-center justify-center font-headline text-3xl animate-bounce">LOADING ARCHIVES...</div>;
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen flex flex-col bg-surface">
+        <Navbar />
+        <div className="flex pt-20">
+          <Sidebar />
+          <main className="lg:ml-64 p-6 md:p-12 w-full space-y-12 animate-pulse">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+              <div>
+                <div className="w-72 h-12 bg-on-surface-variant/20 rounded-xl mb-3"></div>
+                <div className="w-40 h-4 bg-on-surface-variant/10 rounded-md"></div>
+              </div>
+              <div className="w-48 h-24 bg-on-surface-variant/20 border-4 border-transparent rounded-2xl"></div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+               {[1, 2, 3, 4].map((i) => (
+                 <div key={i} className="h-32 bg-on-surface-variant/10 border-4 border-transparent rounded-xl"></div>
+               ))}
+            </div>
+
+            <div>
+              <div className="w-64 h-8 bg-on-surface-variant/20 rounded-xl mb-6"></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                 {[1, 2, 3].map((i) => (
+                   <div key={i} className="h-64 bg-on-surface-variant/10 border-4 border-transparent rounded-2xl"></div>
+                 ))}
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">

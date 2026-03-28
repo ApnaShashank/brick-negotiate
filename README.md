@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧱 Brick Negotiate
 
-## Getting Started
+**Brick Negotiate** is a high-fidelity, Gen Z-focused negotiation simulator styled with a premium **Neobrutalism** aesthetic. Players lock in as "Master Builders," haggle with a sophisticated AI Merchant (powered by Gemini/Groq), and attempt to acquire exclusive digital construction sets for their inventory without depleting their starting budget (Studs).
 
-First, run the development server:
+![Neobrutalism Aesthetics](https://img.shields.io/badge/UI-Neobrutalism-FFE600?style=for-the-badge&logo=css3&logoColor=black)
+![Next.js](https://img.shields.io/badge/Next.js-16+-black?style=for-the-badge&logo=next.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb)
 
+---
+
+## ✨ Key Features
+
+1. **🤖 Advanced AI Negotiation Engine**:
+   - The AI natively understands and generates **Hinglish**, **Hindi**, and **English**.
+   - Utilizes deep "Sales Psychology." It remembers your lowball offers, gets angry, praises good reasoning, and will *Walk Away* if you insult the product.
+2. **🎮 Gamified Economy**:
+   - Users sign up with **500 Starter Studs**.
+   - Successfully negotiated sets are added to the user's **Dashboard Display Case**.
+3. **🔐 Secure Authentication**:
+   - Integrated **Credentials (Email/Password)** and **Google OAuth** login paths using NextAuth.
+   - Passwords are strictly hashed via `bcryptjs`.
+4. **📊 Analytics & Feedback Loop**:
+   - Real-time **Google Analytics 4 (GA4)** & Vercel Web Analytics.
+   - Built-in floating **Feedback System** for users to report bugs or submit feature praise.
+5. **🎨 Premium UI / UX**:
+   - Custom `framer-motion` Interactive Hero Grid.
+   - Custom 404 "Missing Brick" Animations.
+   - Lightning-fast Dashboard **Skeleton Loaders**.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Frontend**: Next.js 16 (App Router), React, Tailwind CSS.
+- **Animations**: Framer Motion.
+- **Backend**: Next.js Serverless API Routes.
+- **Database**: MongoDB (via `mongoose`).
+- **Auth**: NextAuth.js (v4).
+- **AI Models**: Google Gemini (Primary) & Groq (Fallback Engine).
+- **CDN**: ImageKit (High-availability static asset hosting).
+
+---
+
+## 🚀 Local Development Setup
+
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/ApnaShashank/brick-negotiate.git
+cd brick-negotiate
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install Dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Environment Variables
+Create a `.env.local` file in the root directory and add the following keys. **Do not expose these keys publicly.**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Database
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/brick-negotiate
 
-## Learn More
+# Authentication
+NEXTAUTH_SECRET=your_super_secret_random_string
+NEXTAUTH_URL=http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+# Google Login OAuth
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# AI APIs
+GEMINI_API_KEY=your_gemini_key
+GROQ_API_KEY=your_groq_key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Analytics (Optional for Local)
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+```
 
-## Deploy on Vercel
+### 4. Run the Development Server
+```bash
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The application will be running at `http://localhost:3000`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🌍 Production Deployment (Vercel)
+This project is fully tailored for one-click deployment on **Vercel**. 
+1. Link your GitHub repository to Vercel.
+2. Ensure you copy all the Environment Variables from `.env.local` into the Vercel Dashboard **Settings > Environment Variables**.
+3. Deploy!
+
+---
+
+*“Build your empire, one brick at a time.”*

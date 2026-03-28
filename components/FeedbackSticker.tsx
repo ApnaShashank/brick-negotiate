@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 export default function FeedbackSticker() {
   const { status } = useSession();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [type, setType] = useState<'bug' | 'suggestion' | 'praise' | 'other'>('suggestion');
@@ -13,7 +15,7 @@ export default function FeedbackSticker() {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  if (status !== 'authenticated') return null;
+  if (status !== 'authenticated' || pathname === '/game') return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

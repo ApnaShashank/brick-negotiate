@@ -7,9 +7,8 @@ export async function GET() {
     await dbConnect();
     
     // Fetch top 50 users sorted by bestPrice (lowest is better)
-    // We only include users who have actually made a deal (bestPrice < 999999)
+    // We include everyone. Users without deals default to 999999.
     const leaderboard = await User.find({ 
-      bestPrice: { $lt: 999999 },
       email: { $ne: 'admin@bricknegotiate' }
     })
       .sort({ bestPrice: 1 })

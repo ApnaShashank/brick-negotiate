@@ -35,7 +35,8 @@ export default function LeaderboardPage() {
     fetchLeaderboard();
   }, []);
 
-  const topThree = entries.slice(0, 3);
+  const validEntries = entries.filter(e => e.price < 999999);
+  const topThree = validEntries.slice(0, 3);
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -121,7 +122,9 @@ export default function LeaderboardPage() {
                               <td className="p-6">
                                 <span className="bg-on-background/5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">{entry.rounds} ROUNDS</span>
                               </td>
-                              <td className="p-6 text-right font-black text-lg md:text-xl">${entry.price.toFixed(2)}</td>
+                              <td className="p-6 text-right font-black text-lg md:text-xl">
+                                {entry.price < 999999 ? `$${entry.price.toFixed(2)}` : <span className="text-sm opacity-40 uppercase tracking-widest italic">No Deals Yet</span>}
+                              </td>
                             </tr>
                           );
                         })}

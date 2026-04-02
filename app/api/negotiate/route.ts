@@ -8,7 +8,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { message, bid, history, round, product, personality } = body;
+    const { message, history, round, product, personality } = body;
 
     if (!product || !personality) {
       console.error("Missing product or personality in request");
@@ -28,21 +28,27 @@ export async function POST(req: Request) {
       - You MUST flawlessly mirror the buyer's language. If they use fluent Hindi, Hinglish (e.g., "bhai yaar", "kam karo na", "maza nahi aaya"), you MUST reply in natural, street-level Hinglish.
       - Do NOT sound like a robot translator. Use emojis naturally. Be dramatic if offended.
       
+      PRICE EXTRACTION (CRITICAL):
+      - The user will NOT send a separate bid number. They will mention a price naturally in their message.
+      - Examples: "I'll give you 200 for it", "bhai 150 mein de do", "how about $180?", "175 final"
+      - You MUST extract the bid price from their message. If no price is mentioned, assume they are just chatting and respond without changing your offer.
+      - In your JSON output, set "extractedBid" to the price you detected (or 0 if none found).
+      
       IRONCLAD NEGOTIATION ALGORITHM:
       1. MATH RULES (NEVER BREAK):
          - Your 'counterOffer' CANNOT be higher than your previous offer.
-         - Your 'counterOffer' CANNOT be lower than the user's 'bid'.
-         - NEVER accept a deal ("isDealAccepted": true) if the bid is strictly below YOUR BOTTOM LINE. PERIOD. Give them a final warning and walk away if they persist.
+         - Your 'counterOffer' CANNOT be lower than the user's extracted bid.
+         - NEVER accept a deal ("isDealAccepted": true) if the extracted bid is strictly below YOUR BOTTOM LINE. PERIOD.
       2. PATIENCE DECAY:
          - Standard penalty: Drop patience by -5 every round.
-         - Severe Offense: If they offer <50% of Market Value, drop patience by -20 and act deeply insulted ("kya mazak kar rahe ho bhai?").
+         - Severe Offense: If they offer <50% of Market Value, drop patience by -20 and act deeply insulted.
          - Reward: Genuine flattery or great logic = +10 patience.
-      3. LENGTH: Speak strictly under 40 words. Be punchy.
+      3. LENGTH: Speak strictly under 40 words. Be punchy and emotional.
 
       OUTPUT FORMAT (CRITICAL):
-      DO NOT surround the JSON with markdown formatting (no \`\`\`json). The final line MUST be pure raw JSON.
-      Your conversational response text.
-      {"counterOffer": number, "patienceChange": number, "isDealAccepted": boolean, "sentiment": "happy" | "annoyed" | "stubborn" | "neutral"}
+      DO NOT surround the JSON with markdown formatting (no \`\`\`json). The final line MUST be pure raw JSON on its own line.
+      Your conversational response text first.
+      {"counterOffer": number, "patienceChange": number, "isDealAccepted": boolean, "sentiment": "happy" | "annoyed" | "stubborn" | "neutral", "extractedBid": number}
     `;
 
 
@@ -52,7 +58,7 @@ export async function POST(req: Request) {
       // Primary: Gemini
       console.log(`[Negotiate] Attempting Gemini (Round ${round})...`);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = `System Instructions: ${systemPrompt}\n\nHistory: ${JSON.stringify(history.slice(-6))}\n\nUser Message: ${message}\nUser Bid: $${bid}`;
+      const prompt = `System Instructions: ${systemPrompt}\n\nHistory: ${JSON.stringify(history.slice(-6))}\n\nUser Message: ${message}`;
       
       const result = await model.generateContent(prompt);
       aiText = result.response.text();
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
               role: (m.speaker === "ai" ? "assistant" : "user") as "assistant" | "user", 
               content: m.text 
             })),
-            { role: "user", content: `New Message: ${message}, Bid: $${bid}` }
+            { role: "user", content: message }
           ],
           model: "llama-3.3-70b-versatile",
         });
@@ -90,31 +96,36 @@ export async function POST(req: Request) {
 
 function parseAIResponse(text: string, defaultOffer: number) {
   try {
+    // Clean markdown wrappers if AI adds them
+    const cleanedText = text.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
+    
     // Regex for grabbing the last JSON block in the text
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       console.warn("[Parse] No JSON block found in AI text. Using fallback.");
       throw new Error("No JSON block found");
     }
     
     const jsonData = JSON.parse(jsonMatch[0]);
-    const cleanText = text.replace(jsonMatch[0], "").trim();
+    const responseText = cleanedText.replace(jsonMatch[0], "").trim();
 
     return NextResponse.json({
-      response: cleanText || "I've made my decision.",
+      response: responseText || "I've made my decision.",
       counterOffer: jsonData.counterOffer || defaultOffer,
-      patienceChange: jsonData.patienceChange ?? -10,
+      patienceChange: jsonData.patienceChange ?? -5,
       isDealAccepted: !!jsonData.isDealAccepted,
-      sentiment: jsonData.sentiment || "neutral"
+      sentiment: jsonData.sentiment || "neutral",
+      extractedBid: jsonData.extractedBid || 0
     });
   } catch (e) {
     console.error("[Parse] Error parsing AI response:", e, "Raw:", text);
     return NextResponse.json({
-      response: text.replace(/\{[\s\S]*\}/, "").trim() || "Let's stick to the negotiation.",
+      response: text.replace(/\{[\s\S]*\}/, "").replace(/```[\s\S]*```/g, "").trim() || "Let's stick to the negotiation.",
       counterOffer: defaultOffer * 0.95,
       patienceChange: -5,
       isDealAccepted: false,
-      sentiment: "neutral"
+      sentiment: "neutral",
+      extractedBid: 0
     });
   }
 }

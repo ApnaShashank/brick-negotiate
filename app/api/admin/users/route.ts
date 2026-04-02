@@ -7,18 +7,15 @@ import { User } from "@/models/schemas";
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
-    // Strict restriction to admin@bricknegotiate
     if (!session || session.user?.email !== "admin@bricknegotiate") {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 403 });
     }
 
     await dbConnect();
 
-    // Fetch all users with relevant stats for admin registry
     const users = await User.find({})
       .sort({ createdAt: -1 })
-      .select('name email studs bestPrice inventory createdAt');
+      .select('name email studs bestPrice inventory createdAt loginCount lastLoginAt streak isBanned');
 
     const formattedUsers = users.map(u => ({
       id: u._id.toString(),
@@ -27,7 +24,18 @@ export async function GET() {
       studs: u.studs || 0,
       bestPrice: u.bestPrice === 999999 ? "N/A" : `$${u.bestPrice.toFixed(0)}`,
       inventoryCount: u.inventory?.length || 0,
-      joinedAt: new Date(u.createdAt).toLocaleDateString()
+      inventoryItems: (u.inventory || []).map((item: any) => ({
+        productName: item.productName || item.productId,
+        purchasePrice: item.purchasePrice,
+        seller: item.sellerPersonality || 'Unknown',
+        date: item.acquiredAt ? new Date(item.acquiredAt).toLocaleDateString() : 'N/A'
+      })),
+      joinedAt: new Date(u.createdAt).toLocaleDateString(),
+      rawJoinedAt: u.createdAt,
+      loginCount: u.loginCount || 0,
+      lastLoginAt: u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never',
+      streak: u.streak || 0,
+      isBanned: u.isBanned || false,
     }));
 
     return NextResponse.json(formattedUsers);

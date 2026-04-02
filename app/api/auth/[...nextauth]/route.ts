@@ -51,19 +51,35 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
+      await dbConnect();
+
       if (account?.provider === "google") {
-        await dbConnect();
         const existingUser = await User.findOne({ email: user.email });
         if (!existingUser) {
           const newUser = await User.create({
             email: user.email,
             name: user.name,
             image: user.image,
-            studs: 500, // Sign-on bonus
+            studs: 500,
+            loginCount: 1,
+            lastLoginAt: new Date(),
           });
           user.id = newUser._id.toString();
         } else {
+          if (existingUser.isBanned) return false; // Block banned users
+          existingUser.loginCount = (existingUser.loginCount || 0) + 1;
+          existingUser.lastLoginAt = new Date();
+          await existingUser.save();
           user.id = existingUser._id.toString();
+        }
+      } else {
+        // Credentials login — track login
+        const dbUser = await User.findOne({ email: user.email });
+        if (dbUser) {
+          if (dbUser.isBanned) return false;
+          dbUser.loginCount = (dbUser.loginCount || 0) + 1;
+          dbUser.lastLoginAt = new Date();
+          await dbUser.save();
         }
       }
       return true;

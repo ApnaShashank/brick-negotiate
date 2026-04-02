@@ -11,6 +11,10 @@ interface LeaderboardEntry {
   email: string;
   price: number;
   rounds: number;
+  dealCount: number;
+  lastProduct: string | null;
+  favoriteProduct: string | null;
+  inventoryCount: number;
 }
 
 export default function LeaderboardPage() {
@@ -48,7 +52,7 @@ export default function LeaderboardPage() {
         <main className="lg:ml-64 p-6 md:p-12 w-full">
           <header className="mb-12">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter text-on-background uppercase mb-2">Hall of Fame</h1>
-            <p className="text-on-surface-variant font-body font-semibold italic">Ranked by the lowest deal price achieved for the Skyline Modular Tower.</p>
+            <p className="text-on-surface-variant font-body font-semibold italic">Ranked by the lowest deal price achieved. See what everyone's buying!</p>
           </header>
 
           {loading ? (
@@ -68,7 +72,8 @@ export default function LeaderboardPage() {
                   <div className="order-2 md:order-1 transform hover:-translate-y-2 transition-all">
                     <div className="relative bg-secondary-container border-4 border-on-background rounded-xl p-6 brick-shadow text-center">
                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-secondary border-4 border-on-background rounded-full flex items-center justify-center text-white font-headline text-xl">2</div>
-                      <h3 className="text-lg font-black uppercase truncate px-2 mb-3">{topThree[1].name}</h3>
+                      <h3 className="text-lg font-black uppercase truncate px-2 mb-2">{topThree[1].name}</h3>
+                      <div className="text-[10px] font-bold opacity-50 mb-3">{topThree[1].dealCount} deals | {topThree[1].inventoryCount} items</div>
                       <div className="bg-on-background text-secondary-container px-4 py-1 rounded-full text-xs font-black inline-block">${topThree[1].price.toFixed(2)}</div>
                     </div>
                   </div>
@@ -78,7 +83,8 @@ export default function LeaderboardPage() {
                   <div className="order-1 md:order-2 transform hover:-translate-y-4 transition-all z-10">
                     <div className="relative bg-primary-container border-4 border-on-background rounded-2xl p-8 brick-shadow-lg text-center scale-110">
                       <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-20 h-20 bg-primary border-4 border-on-background rounded-full flex items-center justify-center text-white font-headline text-4xl shadow-xl">1</div>
-                      <h3 className="text-xl font-black uppercase truncate mb-4">{topThree[0].name}</h3>
+                      <h3 className="text-xl font-black uppercase truncate mb-2">{topThree[0].name}</h3>
+                      <div className="text-[10px] font-bold opacity-50 mb-4">{topThree[0].dealCount} deals | {topThree[0].inventoryCount} items</div>
                       <div className="bg-on-background text-primary-container px-6 py-2 rounded-full text-xl font-black inline-block">${topThree[0].price.toFixed(2)}</div>
                     </div>
                   </div>
@@ -88,7 +94,8 @@ export default function LeaderboardPage() {
                   <div className="order-3 transform hover:-translate-y-2 transition-all">
                     <div className="relative bg-tertiary-container border-4 border-on-background rounded-xl p-6 brick-shadow text-center">
                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-tertiary border-4 border-on-background rounded-full flex items-center justify-center text-white font-headline text-xl">3</div>
-                      <h3 className="text-lg font-black uppercase truncate px-2 mb-3">{topThree[2].name}</h3>
+                      <h3 className="text-lg font-black uppercase truncate px-2 mb-2">{topThree[2].name}</h3>
+                      <div className="text-[10px] font-bold opacity-50 mb-3">{topThree[2].dealCount} deals | {topThree[2].inventoryCount} items</div>
                       <div className="bg-on-background text-tertiary-container px-4 py-1 rounded-full text-xs font-black inline-block">${topThree[2].price.toFixed(2)}</div>
                     </div>
                   </div>
@@ -102,10 +109,13 @@ export default function LeaderboardPage() {
                     <table className="w-full text-left">
                       <thead>
                         <tr className="bg-on-background text-white uppercase font-headline">
-                          <th className="p-6 text-xs tracking-widest">Rank</th>
-                          <th className="p-6 text-xs tracking-widest">Negotiator</th>
-                          <th className="p-6 text-xs tracking-widest">Rounds</th>
-                          <th className="p-6 text-xs tracking-widest text-right">Price Achieved</th>
+                          <th className="p-4 text-xs tracking-widest">Rank</th>
+                          <th className="p-4 text-xs tracking-widest">Negotiator</th>
+                          <th className="p-4 text-xs tracking-widest">Deals</th>
+                          <th className="p-4 text-xs tracking-widest">Last Purchase</th>
+                          <th className="p-4 text-xs tracking-widest">Favorite</th>
+                          <th className="p-4 text-xs tracking-widest">Items</th>
+                          <th className="p-4 text-xs tracking-widest text-right">Best Price</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -113,16 +123,25 @@ export default function LeaderboardPage() {
                           const isCurrentUser = session?.user?.email === entry.email;
                           return (
                             <tr key={entry.id} className={`border-b-2 border-on-background transition-colors ${isCurrentUser ? 'bg-primary-container/40' : 'hover:bg-surface-container-high'}`}>
-                              <td className="p-6 text-xl md:text-2xl font-black opacity-30">{(idx + 1).toString().padStart(2, '0')}</td>
-                              <td className="p-6">
+                              <td className="p-4 text-xl font-black opacity-30">{(idx + 1).toString().padStart(2, '0')}</td>
+                              <td className="p-4">
                                 <span className={`font-bold uppercase ${isCurrentUser ? 'text-primary animate-pulse' : 'text-on-surface'}`}>
                                   {entry.name} {isCurrentUser && '(YOU)'}
                                 </span>
                               </td>
-                              <td className="p-6">
-                                <span className="bg-on-background/5 px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-wider">{entry.rounds} ROUNDS</span>
+                              <td className="p-4">
+                                <span className="bg-green-200 border border-green-500 px-2 py-1 rounded text-[10px] font-black">{entry.dealCount}</span>
                               </td>
-                              <td className="p-6 text-right font-black text-lg md:text-xl">
+                              <td className="p-4 text-xs font-bold opacity-60 uppercase">
+                                {entry.lastProduct || <span className="italic opacity-40">None</span>}
+                              </td>
+                              <td className="p-4 text-xs font-bold opacity-60 uppercase">
+                                {entry.favoriteProduct || <span className="italic opacity-40">—</span>}
+                              </td>
+                              <td className="p-4">
+                                <span className="bg-on-background/5 px-2 py-1 rounded text-[10px] font-black">{entry.inventoryCount}</span>
+                              </td>
+                              <td className="p-4 text-right font-black text-lg">
                                 {entry.price < 999999 ? `$${entry.price.toFixed(2)}` : <span className="text-sm opacity-40 uppercase tracking-widest italic">No Deals Yet</span>}
                               </td>
                             </tr>

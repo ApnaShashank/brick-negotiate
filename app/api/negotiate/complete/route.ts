@@ -12,48 +12,57 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { productId, finalPrice, rounds, status, personality, history } = await req.json();
+    const { productId, productName, finalPrice, rounds, status, personality, history } = await req.json();
 
     await dbConnect();
     const user = await User.findOne({ email: session.user.email });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product) return NextResponse.json({ error: "Invalid product" }, { status: 400 });
+    const resolvedProductName = productName || product?.name || productId;
 
-    // Create Negotiation Log
+    // Create Negotiation Log with full chat history
     const negotiation = await Negotiation.create({
       userId: user._id,
       productId,
-      productName: product.name,
+      productName: resolvedProductName,
       personality: personality?.id || 'standard',
+      personalityName: personality?.name || '',
       finalPrice,
       rounds,
       status,
-      history
+      history: (history || []).map((msg: any, i: number) => ({
+        round: Math.floor(i / 2) + 1,
+        offer: msg.bid || 0,
+        bid: msg.bid || 0,
+        sentiment: msg.sentiment || '',
+        speaker: msg.speaker || 'player',
+        text: msg.text || '',
+      }))
     });
 
     if (status === 'accepted') {
-      // Calculate Studs Reward: (Saving * 2) + Completion Bonus
-      const savings = Math.max(0, product.marketValue - finalPrice);
+      const marketValue = product?.marketValue || finalPrice;
+      // Calculate Studs Reward: (Saving * 5) + Completion Bonus
+      const savings = Math.max(0, marketValue - finalPrice);
       const reward = Math.floor(savings * 5) + 100;
 
       // Update User
       user.studs = (user.studs || 0) + reward;
       
-      // Add to inventory
+      // Add to inventory with product name and seller info
       user.inventory.push({
         productId,
+        productName: resolvedProductName,
         purchasePrice: finalPrice,
+        sellerPersonality: personality?.name || '',
         acquiredAt: new Date()
       });
 
-      // Update Best Price for this specific product (legacy support for global top price)
-      if (productId === 'modular-tower') {
-        if (finalPrice < user.bestPrice) {
-          user.bestPrice = finalPrice;
-          user.bestRounds = rounds;
-        }
+      // Update Best Price (track globally across all products)
+      if (finalPrice < user.bestPrice) {
+        user.bestPrice = finalPrice;
+        user.bestRounds = rounds;
       }
 
       await user.save();

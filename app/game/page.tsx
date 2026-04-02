@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { PRODUCTS, PERSONALITIES, Product, Personality } from '@/lib/game-data';
-import BidPopUp from '@/components/BidPopUp';
 
 interface Message {
   speaker: 'ai' | 'player' | 'user';
@@ -24,24 +23,75 @@ export default function GamePage() {
   // Negotiation State
   const [messages, setMessages] = useState<Message[]>([]);
   const [userMessage, setUserMessage] = useState('');
-  const [bidAmount, setBidAmount] = useState<number | string>('');
   const [round, setRound] = useState(1);
   const [patience, setPatience] = useState(100);
   const [timeLeft, setTimeLeft] = useState(600);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [currentOffer, setCurrentOffer] = useState(0);
-  const [showBidAlert, setShowBidAlert] = useState(false);
+
+  // Voice State
+  const [isListening, setIsListening] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(true);
+  const recognitionRef = useRef<any>(null);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'hi-IN'; // Hindi + English support
+        
+        recognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          setUserMessage(prev => prev ? prev + ' ' + transcript : transcript);
+          setIsListening(false);
+        };
+        
+        recognition.onerror = () => setIsListening(false);
+        recognition.onend = () => setIsListening(false);
+        
+        recognitionRef.current = recognition;
+      }
+    }
+  }, []);
+
+  // Text-to-Speech for AI responses
+  const speakText = (text: string) => {
+    if (!voiceEnabled || typeof window === 'undefined') return;
+    const synth = window.speechSynthesis;
+    synth.cancel(); // Cancel any ongoing speech
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'hi-IN';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    synth.speak(utterance);
+  };
+
+  const toggleMic = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current.start();
+      setIsListening(true);
+    }
+  };
 
   // Initialize Game
   const handleStartGame = () => {
     if (selectedProduct && selectedPersonality) {
+      const welcomeText = `Welcome! I'm ${selectedPersonality.name}. I see you're interested in the ${selectedProduct.name}. My asking price is $${selectedProduct.marketValue}. What's your offer?`;
       setMessages([
         {
           speaker: 'ai',
-          text: `Welcome! I'm ${selectedPersonality.name}. I see you're interested in the ${selectedProduct.name}. My asking price is $${selectedProduct.marketValue}. What's your offer?`,
+          text: welcomeText,
           bid: selectedProduct.marketValue,
           sentiment: 'neutral'
         }
@@ -49,9 +99,9 @@ export default function GamePage() {
       setCurrentOffer(selectedProduct.marketValue);
       setPatience(100 * selectedPersonality.patienceMultiplier);
       setGameStep('negotiate');
+      speakText(welcomeText);
     }
   };
-
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -72,7 +122,6 @@ export default function GamePage() {
 
     setIsCalculating(true);
     try {
-      // Create a final message for history
       const acceptMsg = { speaker: 'player' as const, text: `I accept your offer of $${currentOffer.toFixed(2)}!` };
       setMessages((prev) => [...prev, acceptMsg]);
 
@@ -83,6 +132,7 @@ export default function GamePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           productId: selectedProduct.id,
+          productName: selectedProduct.name,
           finalPrice: currentOffer,
           rounds: round,
           status: 'accepted',
@@ -103,27 +153,19 @@ export default function GamePage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isGameOver || isCalculating || !userMessage || !selectedProduct || !selectedPersonality) return;
-
-    if (!bidAmount || Number(bidAmount) <= 0) {
-      setShowBidAlert(true);
-      return;
-    }
+    if (isGameOver || isCalculating || !userMessage.trim() || !selectedProduct || !selectedPersonality) return;
 
     const newPlayerMessage = {
       speaker: 'player' as const,
       text: userMessage,
-      bid: Number(bidAmount),
     };
 
     setMessages((prev) => [...prev, newPlayerMessage]);
     setIsCalculating(true);
     
     const originalMsg = userMessage;
-    const originalBid = bidAmount;
     const currentRound = round;
     setUserMessage('');
-    setBidAmount('');
 
     try {
       const resp = await fetch('/api/negotiate', {
@@ -131,7 +173,6 @@ export default function GamePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: originalMsg,
-          bid: Number(originalBid),
           history: messages,
           round: currentRound,
           product: selectedProduct,
@@ -142,32 +183,50 @@ export default function GamePage() {
       const data = await resp.json();
       if (data.error) throw new Error(data.error);
 
-      setMessages((prev) => [...prev, { 
-        speaker: 'ai', 
+      const aiMessage = { 
+        speaker: 'ai' as const, 
         text: data.response, 
         bid: data.counterOffer,
         sentiment: data.sentiment 
-      }]);
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      speakText(data.response);
       
       setCurrentOffer(data.counterOffer);
-      setPatience((prev) => Math.max(0, Math.floor(prev + (data.patienceChange || -10))));
+      setPatience((prev) => Math.max(0, Math.floor(prev + (data.patienceChange || -5))));
       setRound((prev) => prev + 1);
 
       if (data.isDealAccepted || currentRound >= 10 || patience <= 5) {
         setIsGameOver(true);
         
-        // Auto-finalize if AI accepted
         if (data.isDealAccepted) {
           await fetch('/api/negotiate/complete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               productId: selectedProduct.id,
+              productName: selectedProduct.name,
               finalPrice: data.counterOffer,
               rounds: currentRound,
               status: 'accepted',
               personality: selectedPersonality,
-              history: [...messages, newPlayerMessage, { speaker: 'ai', text: data.response, bid: data.counterOffer }]
+              history: [...messages, newPlayerMessage, aiMessage]
+            })
+          });
+        } else {
+          // Log failed/walked_away negotiation
+          await fetch('/api/negotiate/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: selectedProduct.id,
+              productName: selectedProduct.name,
+              finalPrice: data.counterOffer,
+              rounds: currentRound,
+              status: patience <= 5 ? 'walked_away' : 'failed',
+              personality: selectedPersonality,
+              history: [...messages, newPlayerMessage, aiMessage]
             })
           });
         }
@@ -271,7 +330,6 @@ export default function GamePage() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Navbar />
-      <BidPopUp isVisible={showBidAlert} onClose={() => setShowBidAlert(false)} />
       <main className="pt-24 pb-8 md:pt-32 px-4 md:px-8 max-w-7xl mx-auto flex-1 flex flex-col gap-6 md:gap-8 w-full overflow-hidden">
         {/* Header Stats */}
         <header className="flex flex-wrap gap-3 md:gap-4 items-center justify-between">
@@ -286,9 +344,14 @@ export default function GamePage() {
               <span className="font-headline font-black text-sm md:text-xl uppercase">{patience}% Patience</span>
             </div>
           </div>
-          <div className="hidden sm:block font-label text-[10px] font-black uppercase opacity-40">
-            Playing as: Contractor
-          </div>
+          {/* Voice toggle */}
+          <button 
+            onClick={() => setVoiceEnabled(!voiceEnabled)} 
+            className={`flex items-center gap-1 px-3 py-2 rounded-lg border-2 border-on-background text-xs font-black uppercase transition-all ${voiceEnabled ? 'bg-primary-container' : 'bg-surface-container opacity-50'}`}
+          >
+            <span className="material-symbols-outlined text-sm">{voiceEnabled ? 'volume_up' : 'volume_off'}</span>
+            {voiceEnabled ? 'Voice On' : 'Voice Off'}
+          </button>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start flex-1 min-h-0 overflow-hidden">
@@ -354,7 +417,7 @@ export default function GamePage() {
                     </p>
                     {m.bid && (
                       <div className="mt-2 text-[10px] font-black opacity-60 border-t border-on-background/10 pt-1">
-                        CURRENT: ${m.bid.toFixed(2)}
+                        OFFER: ${m.bid.toFixed(2)}
                       </div>
                     )}
                   </div>
@@ -371,34 +434,31 @@ export default function GamePage() {
             </div>
 
             <div className="p-4 md:p-6 bg-surface-container border-t-4 border-on-background">
-              <form onSubmit={handleSendMessage} className="flex flex-col sm:flex-row gap-3">
+              <form onSubmit={handleSendMessage} className="flex gap-3">
                 <input
                   value={userMessage}
                   onChange={(e) => setUserMessage(e.target.value)}
                   disabled={isGameOver || isCalculating}
                   className="flex-1 bg-white border-2 border-on-background rounded-xl p-4 font-body font-bold placeholder:opacity-40 focus:ring-4 focus:ring-primary/20 transition-all disabled:opacity-50"
-                  placeholder="Type your strategic proposal..."
+                  placeholder="Type your price & message... (e.g. 'bhai 200 mein de do')"
                 />
-                <div className="flex gap-2">
-                  <div className="relative w-28 md:w-32">
-                    <span className="absolute -top-2 left-4 px-1 bg-on-background text-[8px] text-white font-black rounded">BID</span>
-                    <input
-                      value={bidAmount}
-                      onChange={(e) => setBidAmount(e.target.value)}
-                      disabled={isGameOver || isCalculating}
-                      className="w-full bg-white border-2 border-on-background rounded-xl p-4 font-headline font-black text-center transition-all"
-                      type="number"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <button
-                    disabled={isGameOver || isCalculating}
-                    className="bg-primary-container border-4 border-on-background rounded-xl px-6 flex items-center justify-center brick-shadow hover:scale-105 active:scale-95 transition-all disabled:opacity-20"
-                    type="submit"
-                  >
-                    <span className="material-symbols-outlined font-black">send</span>
-                  </button>
-                </div>
+                {/* Mic Button */}
+                <button
+                  type="button"
+                  onClick={toggleMic}
+                  disabled={isGameOver || isCalculating}
+                  className={`px-4 rounded-xl border-2 border-on-background flex items-center justify-center transition-all ${isListening ? 'bg-red-400 animate-pulse border-red-600' : 'bg-tertiary-container hover:scale-105'} disabled:opacity-20`}
+                >
+                  <span className="material-symbols-outlined">{isListening ? 'stop_circle' : 'mic'}</span>
+                </button>
+                {/* Send */}
+                <button
+                  disabled={isGameOver || isCalculating}
+                  className="bg-primary-container border-4 border-on-background rounded-xl px-6 flex items-center justify-center brick-shadow hover:scale-105 active:scale-95 transition-all disabled:opacity-20"
+                  type="submit"
+                >
+                  <span className="material-symbols-outlined font-black">send</span>
+                </button>
               </form>
             </div>
           </section>
